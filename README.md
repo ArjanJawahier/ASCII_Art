@@ -6,6 +6,6 @@ Run with the command `python3 image_ascii_filter.py <img_file> <char_size>`.
 
 ## Examples:
 ![scene12_original](images/scene12.png?raw=true)
-![scene12_ascii5](images/scene12_ascii5.jpg?raw=true)
-![scene12_ascii10](images/scene12_ascii10.jpg?raw=true)
-![scene12_ascii15](images/scene12_ascii15.jpg?raw=true)
+![scene12_ascii5](images/scene12_ascii_5.jpg?raw=true)
+![scene12_ascii10](images/scene12_ascii_10.jpg?raw=true)
+![scene12_ascii15](images/scene12_ascii_15.jpg?raw=true)

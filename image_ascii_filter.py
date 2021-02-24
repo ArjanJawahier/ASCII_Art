@@ -6,6 +6,12 @@ from itertools import product
 from ascii_brightness import average_brightness
 
 def find_best_fitting_char(avg_brights, char_brights, row_block, col_block):
+    """
+    This function computes the best fitting character to be put in
+    the block [row_block, col_block] in the new ASCII image.
+    The chosen character will have a similar (relative) brightness level
+    as the block of pixels in the original image.
+    """
     value = avg_brights[row_block, col_block]
     for char, bright in char_brights[::-1]:
         if bright <= value:
@@ -22,7 +28,7 @@ def main():
         max_char_brightness = char_brightness[-1][1]
 
     let_size = (args.char_size, args.char_size)
-
+    
     with Image.open(args.image_filename).convert('L') as original_img:
         original_imgarr = np.array(original_img)
         shape = original_imgarr.shape
