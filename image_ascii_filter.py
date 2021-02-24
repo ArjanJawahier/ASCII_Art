@@ -43,7 +43,7 @@ def main():
             char = find_best_fitting_char(avg_brightness, char_brightness, row_block, col_block)
             draw.text((col_block*let_size[1], row_block*let_size[0]), char, 255, font=monospace_font)
 
-        new_img_filename = args.image_filename.split(".")[0] + "_ascii.jpg"
+        new_img_filename = args.image_filename.split(".")[0] + f"_ascii_{args.char_size}.jpg"
         ascii_img.save(new_img_filename, "JPEG")
 
 if __name__ == "__main__":
