@@ -6,4 +6,4 @@ Run with the command `python3 image_ascii_filter.py <img_file> <char_size>`.
 
 ## Examples:
 ![scene12_original](scene12.png?raw=true)
-![scene12_ascii](scene12_ascii.png?raw=true)
+![scene12_ascii](scene12_ascii.jpg?raw=true)
