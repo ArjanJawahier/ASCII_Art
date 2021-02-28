@@ -11,25 +11,25 @@ import numpy as np
 import time
 
 def video_to_ascii(args, char_brightness):
-    # box_size = (args.box_size, args.box_size)
+    box_size = (args.box_size, args.box_size)
 
-    # tmp_dir = "temp"
-    # if os.path.isdir(tmp_dir):
-    #     shutil.rmtree(tmp_dir)
+    tmp_dir = "temp"
+    if os.path.isdir(tmp_dir):
+        shutil.rmtree(tmp_dir)
     
-    # os.mkdir(tmp_dir)
+    os.mkdir(tmp_dir)
 
-    # vidcap = cv2.VideoCapture(args.video_filename)
-    # success, image = vidcap.read()
-    # count = 0
-    # while success:
-    #     # image = image.reshape((image.shape[1], image.shape[0], image.shape[2]))
-    #     ascii_image = image_to_ascii(image, box_size, char_brightness, args.color)
-    #     framename = f"temp/frame{str(count).zfill(6)}.png"
-    #     cv2.imwrite(framename, ascii_image)
-    #     print('Created ' + framename)
-    #     success, image = vidcap.read()
-    #     count += 1
+    vidcap = cv2.VideoCapture(args.video_filename)
+    success, image = vidcap.read()
+    count = 0
+    while success:
+        # image = image.reshape((image.shape[1], image.shape[0], image.shape[2]))
+        ascii_image = image_to_ascii(image, box_size, char_brightness, args.color)
+        framename = f"temp/frame{str(count).zfill(6)}.png"
+        cv2.imwrite(framename, ascii_image)
+        print('Created ' + framename)
+        success, image = vidcap.read()
+        count += 1
 
     frames_per_second = 60
     fp_in = "temp/frame*.png"
