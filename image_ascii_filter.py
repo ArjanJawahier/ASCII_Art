@@ -22,7 +22,7 @@ def find_best_fitting_char(avg_brights, char_brights, row_block, col_block):
     return char
 
 
-def average_hsv(img, size, max_char_brightness):
+def average_hsv(img, size, max_char_brightness, full_saturation=True):
     arr = np.array(img)
     w, h = size
     total_color = np.zeros(3)
@@ -31,6 +31,10 @@ def average_hsv(img, size, max_char_brightness):
     average_color = total_color / (w*h)
 
     avg_hsv = rgb_to_hsv(average_color)
+
+    if full_saturation:
+        avg_hsv[1] = 1.
+
     if np.any(np.isnan(avg_hsv)):
         avg_hsv = np.zeros(3)
     else:
@@ -54,7 +58,7 @@ def compute_filling_color(avg_hsv, row_block, col_block):
     return rgba_tuple
 
 
-def image_to_ascii(img, box_size, char_brightness, color=False):
+def image_to_ascii(img, box_size, char_brightness, color=False, full_saturation=True):
     max_char_brightness = char_brightness[-1][1] # Assumes char_brightness is asc sorted
     num_vertical = img.shape[0] // box_size[0]
     num_horizontal = img.shape[1] // box_size[1]
@@ -63,7 +67,7 @@ def image_to_ascii(img, box_size, char_brightness, color=False):
     for row_block, col_block in product(range(num_vertical), range(num_horizontal)):
         r, c = row_block * box_size[0], col_block * box_size[1]
         block = img[r:r+box_size[0], c:c+box_size[1]]
-        avg_hsv[row_block, col_block] = average_hsv(block, box_size, max_char_brightness)
+        avg_hsv[row_block, col_block] = average_hsv(block, box_size, max_char_brightness, full_saturation)
 
 
     with Image.new(conversion(color), (img.shape[1], img.shape[0])) as ascii_img:
@@ -88,6 +92,7 @@ if __name__ == "__main__":
     parser.add_argument('image_filename', help="The filename of the image you want to convert.")
     parser.add_argument('box_size', type=int, help="The size of the boxes the ASCII characters will go in.")
     parser.add_argument('--color', action="store_true", help="Whether to use colored ASCII characters.")
+    parser.add_argument('--full_saturation', action="store_true", help="Whether to use fully saturated colors.")
     args = parser.parse_args()
     box_size = (args.box_size, args.box_size)
 
@@ -97,7 +102,7 @@ if __name__ == "__main__":
     with open("character_brightnesses.data", "rb") as filehandle:
         char_brightness = pickle.load(filehandle)[1:] # Manually removing underscore (_ is bugged -> brightness of 0)
 
-    ascii_img = image_to_ascii(img, box_size, char_brightness, args.color)
+    ascii_img = image_to_ascii(img, box_size, char_brightness, args.color, not args.full_saturation)
     ascii_img = cv2.cvtColor(ascii_img, cv2.COLOR_RGB2BGR)
 
     if args.color:
