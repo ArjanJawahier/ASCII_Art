@@ -4,6 +4,10 @@ __pycache__/
 *$py.class
 
 *sample*.jpg
+*.mp4
+*.png
+images/sample7_ascii_60fps.gif
+
 
 # C extensions
 *.so

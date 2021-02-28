@@ -1,4 +1,6 @@
 from PIL import Image, ImageDraw, ImageFont
+import cv2
+import os
 import argparse
 import pickle
 import numpy as np
@@ -52,51 +54,55 @@ def compute_filling_color(avg_hsv, row_block, col_block):
     return rgba_tuple
 
 
-def main():
+def image_to_ascii(img, box_size, char_brightness, color=False):
+    max_char_brightness = char_brightness[-1][1] # Assumes char_brightness is asc sorted
+    num_vertical = img.shape[0] // box_size[0]
+    num_horizontal = img.shape[1] // box_size[1]
+    avg_hsv = np.zeros((num_vertical, num_horizontal, 3))
+
+    for row_block, col_block in product(range(num_vertical), range(num_horizontal)):
+        r, c = row_block * box_size[0], col_block * box_size[1]
+        block = img[r:r+box_size[0], c:c+box_size[1]]
+        avg_hsv[row_block, col_block] = average_hsv(block, box_size, max_char_brightness)
+
+
+    with Image.new(conversion(color), (img.shape[1], img.shape[0])) as ascii_img:
+        draw = ImageDraw.Draw(ascii_img)
+        monospace_font = ImageFont.truetype("UbuntuMono-R.ttf", box_size[0]+2)
+
+        for row_block, col_block in product(range(num_vertical), range(num_horizontal)):
+            char = find_best_fitting_char(avg_hsv[:, :, 2], char_brightness, row_block, col_block)
+            if char and color:
+                fill = compute_filling_color(avg_hsv, row_block, col_block)
+            elif char and not color:
+                fill = 255
+            else:
+                continue
+            draw.text((col_block*box_size[1], row_block*box_size[0]), char, fill=fill, font=monospace_font)
+
+        ascii_img = np.array(ascii_img)
+        return ascii_img
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Convert an image into ASCII art.')
     parser.add_argument('image_filename', help="The filename of the image you want to convert.")
     parser.add_argument('box_size', type=int, help="The size of the boxes the ASCII characters will go in.")
     parser.add_argument('--color', action="store_true", help="Whether to use colored ASCII characters.")
     args = parser.parse_args()
-
     box_size = (args.box_size, args.box_size)
+
+    with Image.open(args.image_filename).convert(conversion(args.color)) as original_img:
+        img = np.array(original_img)
 
     with open("character_brightnesses.data", "rb") as filehandle:
         char_brightness = pickle.load(filehandle)[1:] # Manually removing underscore (_ is bugged -> brightness of 0)
-        max_char_brightness = char_brightness[-1][1]
 
-        
-    with Image.open(args.image_filename).convert(conversion(args.color)) as original_img:
-        original_imgarr = np.array(original_img)
-        shape = original_imgarr.shape
-        num_vertical = shape[0]//box_size[0]
-        num_horizontal = shape[1]//box_size[1]
-        avg_hsv = np.zeros((num_vertical, num_horizontal, 3))
+    ascii_img = image_to_ascii(img, box_size, char_brightness, args.color)
+    ascii_img = cv2.cvtColor(ascii_img, cv2.COLOR_RGB2BGR)
 
-        for row_block, col_block in product(range(num_vertical), range(num_horizontal)):
-            r, c = row_block * box_size[0], col_block * box_size[1]
-            block = original_imgarr[r:r+box_size[0], c:c+box_size[1]]
-            avg_hsv[row_block, col_block] = average_hsv(block, box_size, max_char_brightness)
+    if args.color:
+        new_img_filename = args.image_filename.split(".")[0] + f"_ascii_{args.box_size}_color.jpg"
+    else:
+        new_img_filename = args.image_filename.split(".")[0] + f"_ascii_{args.box_size}.jpg"
 
-
-    with Image.new(conversion(args.color), original_img.size) as ascii_img:
-        draw = ImageDraw.Draw(ascii_img)
-        monospace_font = ImageFont.truetype("UbuntuMono-R.ttf", args.box_size+2)
-        for row_block, col_block in product(range(num_vertical), range(num_horizontal)):
-            char = find_best_fitting_char(avg_hsv[:, :, 2], char_brightness, row_block, col_block)
-            if char:
-                if args.color:
-                    fill = compute_filling_color(avg_hsv, row_block, col_block)
-                else:
-                    fill = 255
-                draw.text((col_block*box_size[1], row_block*box_size[0]), char, fill=fill, font=monospace_font)
-
-
-        if args.color:
-            new_img_filename = args.image_filename.split(".")[0] + f"_ascii_{args.box_size}_color.jpg"
-        else:
-            new_img_filename = args.image_filename.split(".")[0] + f"_ascii_{args.box_size}.jpg"
-        ascii_img.save(new_img_filename, "JPEG")
-
-if __name__ == "__main__":
-    main()
+    cv2.imwrite(new_img_filename, ascii_img)
