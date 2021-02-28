@@ -9,5 +9,7 @@ Run with the command `python3 image_ascii_filter.py <img_file> <char_size> [--co
 ![scene12_ascii5](images/scene12_ascii_5.jpg?raw=true)
 ![scene12_ascii10](images/scene12_ascii_10_color.jpg?raw=true)
 ![scene12_ascii15](images/scene12_ascii_15.jpg?raw=true)
+
 Manually compressed example GIF (the original GIF was 103 MB):
+
 ![GIF_plons](images/sample7_ascii_compressed.gif?raw=true)
